@@ -7,10 +7,11 @@ import os # You need to import os
 # --- Configuration (EDIT THESE) ---
 
 # 1. TOKEN: Use an environment variable or a secure file. Replaced the public one.
+ALLOWED_SERVERS = {1439561356960464979}
 DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
 # 2. ROLE RESTRICTION: Define the names of the roles allowed to use MODERATION commands.
 # Only users with one of these roles can use commands like !kick, !ban, !purge, !timeout.
-MODERATION_ROLES = ["Admin", "Moderator", "Helper"] 
+MODERATION_ROLES = ["Admin", "Moderator"] 
 
 # --- Bot Setup and Intents ---
 
@@ -51,7 +52,29 @@ async def on_ready():
     """Confirms the bot is running and connected to Discord."""
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
+
+    unauthorized_guilds = []
+    for guild in bot.guilds:
+        if guild.id not in ALLOWED_SERVERS:
+            unauthorized_guilds.append(guild.name)
+            await guild.leave()
+            
+    if unauthorized_guilds:
+        print(f"🚫 CLEANUP: Left the following unauthorized guilds on startup: {', '.join(unauthorized_guilds)}")
+
     await bot.change_presence(activity=discord.Game(name="Ready for instructions"))
+
+
+@bot.event
+async def on_guild_join(guild):
+    """3. 🛡️ CHECK ON NEW INVITE"""
+    if guild.id not in ALLOWED_SERVERS:
+        print(f"❌ UNAUTHORIZED JOIN: Leaving Guild '{guild.name}' (ID: {guild.id})")
+        # Optional: Add a polite message here before leaving
+        await guild.leave()
+    else:
+        print(f"✅ ALLOWED JOIN: Staying in Guild '{guild.name}' (ID: {guild.id})")
+
 
 @bot.event
 async def on_command_error(ctx, error):
