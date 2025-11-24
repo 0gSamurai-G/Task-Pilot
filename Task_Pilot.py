@@ -51,7 +51,7 @@ async def on_ready():
     """Confirms the bot is running and connected to Discord."""
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
-    await bot.change_presence(activity=discord.Game(name="Moderating the Server"))
+    await bot.change_presence(activity=discord.Game(name="Ready for instructions"))
 
 @bot.event
 async def on_command_error(ctx, error):
